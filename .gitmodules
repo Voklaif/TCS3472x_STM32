@@ -1,0 +1,3 @@
+[submodule "Drivers/TCS3472x"]
+	path = Drivers/TCS3472x
+	url = https://github.com/Voklaif/TCS3472X-C-Driver
