@@ -24,6 +24,7 @@ Release/
 *.cproject
 *.project
 *.launches
+*.launch
 
 # Ignore IDE-specific files
 # For example, STM32CubeIDE
