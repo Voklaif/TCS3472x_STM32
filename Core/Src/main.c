@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "tcs3472x.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,7 +45,7 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+uint16_t all_colors[4] = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,6 +94,7 @@ int main(void)
   MX_I2C1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  tcs3472x_init();
 
   /* USER CODE END 2 */
 
@@ -101,6 +102,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  tcs3472x_get_all_colors_data(all_colors);
+	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -274,6 +277,35 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+int8_t tcs3472x_i2c_hal_write(const uint8_t *buffer, uint16_t length)
+{
+	HAL_StatusTypeDef status;
+	status = HAL_I2C_Master_Transmit(&hi2c1, 0x29, buffer, length, 1000);
+
+	if(status != HAL_OK)
+	{
+		return 0;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+int8_t tcs3472x_i2c_hal_read(uint8_t *buffer, uint16_t length)
+{
+	HAL_StatusTypeDef status;
+	status = HAL_I2C_Master_Receive(&hi2c1, 0x29, buffer, length, 1000);
+
+	if(status != HAL_OK)
+	{
+		return 0;
+	}
+	else
+	{
+		return -1;
+	}
+}
 
 /* USER CODE END 4 */
 
