@@ -21,6 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
 #include "tcs3472x.h"
 /* USER CODE END Includes */
 
@@ -31,7 +32,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -49,9 +51,11 @@ static const uint8_t TCS3472X_ADDR = 0x29 << 1;
 
 uint16_t all_colors[4] = {0};
 uint8_t tcs3472x_id = 0;
+float integration_time, actual_integration_time = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
+int _write(int file, char *data, int len);
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
@@ -105,6 +109,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
   tcs3472x_id = tcs3472x_get_id();
+  actual_integration_time = tcs3472x_set_atime(111.0f);
+  integration_time = tcs3472x_get_atime();
 
   while (1)
   {
@@ -227,7 +233,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 38400;
+  huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -284,6 +290,16 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+int _write(int file, char *data, int len) {
+    // Check if the file descriptor is stdout or stderr
+    if (file == STDOUT_FILENO || file == STDERR_FILENO) {
+        HAL_UART_Transmit(&huart2, (uint8_t *)data, len, HAL_MAX_DELAY);  // Transmit data over UART
+        return len;
+    }
+    // Return error if file descriptor is not handled
+    return -1;
+}
+
 int8_t tcs3472x_i2c_hal_write(uint8_t *buffer, uint16_t length)
 {
 	HAL_StatusTypeDef status;
@@ -293,10 +309,7 @@ int8_t tcs3472x_i2c_hal_write(uint8_t *buffer, uint16_t length)
 	{
 		return -1;
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 int8_t tcs3472x_i2c_hal_read(uint8_t *buffer, uint16_t length)
@@ -308,10 +321,7 @@ int8_t tcs3472x_i2c_hal_read(uint8_t *buffer, uint16_t length)
 	{
 		return -1;
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 /* USER CODE END 4 */
